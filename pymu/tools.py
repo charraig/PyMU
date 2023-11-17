@@ -147,33 +147,6 @@ def getStations(configFrame):
     return stations
 
 
-def createAggPhasors(configFrame):
-    """
-    Creates an array of aggregate phasors for data collection
-
-    :param configFrame: ConfigFrame containing stations
-    :type configFrame: ConfigFrame
-
-    :return: List containing all the station AggPhasor objects
-    """
-    pmus = []
-    for s in getStations(configFrame):
-        phasors = []
-        print("Name:", s.stn)
-        for p in range(0, s.phnmr):
-            print("Phasor:", s.channels[p])
-            theUnit = "VOLTS"
-            if s.phunits[p].voltORcurr == "CURRENT":
-                theUnit = "AMPS"
-            phasors.append(
-                AggPhasor(s.stn.strip() + "/" + s.channels[p].strip(), theUnit)
-            )
-
-        pmus.append(phasors)
-
-    return pmus
-
-
 def parseSamples(data, configFrame, pmus):
     """
     Takes an array of dataFrames and inserts the data into an array of aggregate phasors
