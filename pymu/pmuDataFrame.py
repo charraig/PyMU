@@ -122,10 +122,12 @@ class PMU:
 
     def parseStat(self):
         """Parse bit mapped flags field"""
-        l = 4
-        print("STAT:", self.pmuHex[self.length : self.length + l]) if self.dbg else None
-        self.stat = Stat(self.pmuHex[self.length : self.length + l])
-        self.updateLength(l)
+        shift = 4
+        print(
+            "STAT:", self.pmuHex[self.length : self.length + shift]
+        ) if self.dbg else None
+        self.stat = Stat(self.pmuHex[self.length : self.length + shift])
+        self.updateLength(shift)
 
     def parsePhasors(self):
         """Parse phasor estimates from PMU"""
@@ -146,63 +148,65 @@ class PMU:
 
     def parseFreq(self):
         """Parse frequency"""
-        l = 4 if self.stationFrame.freqType == "INTEGER" else 8
-        print("FREQ:", self.pmuHex[self.length : self.length + l]) if self.dbg else None
-        unpackStr = "!h" if l == 4 else "!f"
+        shift = 4 if self.stationFrame.freqType == "INTEGER" else 8
+        print(
+            "FREQ:", self.pmuHex[self.length : self.length + shift]
+        ) if self.dbg else None
+        unpackStr = "!h" if shift == 4 else "!f"
         self.freq = struct.unpack(
-            unpackStr, bytes.fromhex(self.pmuHex[self.length : self.length + l])
+            unpackStr, bytes.fromhex(self.pmuHex[self.length : self.length + shift])
         )[0]
-        self.updateLength(l)
+        self.updateLength(shift)
         print("FREQ:", self.freq) if self.dbg else None
 
     def parseDfreq(self):
         """Parse rate of change of frequency (ROCOF)"""
-        l = 4 if self.stationFrame.freqType == "INTEGER" else 8
+        shift = 4 if self.stationFrame.freqType == "INTEGER" else 8
         print(
-            "DFREQ: ", self.pmuHex[self.length : self.length + l]
+            "DFREQ: ", self.pmuHex[self.length : self.length + shift]
         ) if self.dbg else None
-        unpackStr = "!h" if l == 4 else "!f"
+        unpackStr = "!h" if shift == 4 else "!f"
         self.dfreq = (
             struct.unpack(
-                unpackStr, bytes.fromhex(self.pmuHex[self.length : self.length + l])
+                unpackStr, bytes.fromhex(self.pmuHex[self.length : self.length + shift])
             )[0]
         ) / 100
-        self.updateLength(l)
+        self.updateLength(shift)
         print("DFREQ:", self.dfreq) if self.dbg else None
 
     def parseAnalog(self):
         """Parse analog data"""
         self.analogs = [None] * self.numOfAnlg
-        l = 4 if self.stationFrame.anlgType == "INTEGER" else 8
-        unpackStr = "!h" if l == 4 else "!f"
+        shift = 4 if self.stationFrame.anlgType == "INTEGER" else 8
+        unpackStr = "!h" if shift == 4 else "!f"
         for i in range(0, self.numOfAnlg):
             name = self.stationFrame.channels[self.numOfPhsrs + i].strip()
             print(
-                "ANALOG:", self.pmuHex[self.length : self.length + l]
+                "ANALOG:", self.pmuHex[self.length : self.length + shift]
             ) if self.dbg else None
             val = struct.unpack(
-                unpackStr, bytes.fromhex(self.pmuHex[self.length : self.length + l])
+                unpackStr, bytes.fromhex(self.pmuHex[self.length : self.length + shift])
             )[0]
             print(name, "=", val) if self.dbg else None
             self.analogs[i] = (name, val)
-            self.updateLength(l)
+            self.updateLength(shift)
 
     def parseDigital(self):
         """Parse digital data"""
         self.digitals = [None] * self.numOfDgtl
-        l = 4
-        totValBin = hexToBin(self.pmuHex[self.length : self.length + l], 16)
+        shift = 4
+        totValBin = hexToBin(self.pmuHex[self.length : self.length + shift], 16)
         for i in range(0, self.numOfDgtl):
             name = self.stationFrame.channels[
                 self.numOfPhsrs + self.numOfAnlg + i
             ].strip()
             print(
-                "DIGITAL:", self.pmuHex[self.length : self.length + l]
+                "DIGITAL:", self.pmuHex[self.length : self.length + shift]
             ) if self.dbg else None
             val = totValBin[i]
             print(name, "=", val) if self.dbg else None
             self.digitals[i] = (name, val)
-            self.updateLength(l)
+            self.updateLength(shift)
 
 
 class Phasor:
