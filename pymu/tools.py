@@ -2,10 +2,11 @@
 Tools for common functions relayed to commanding, reading, and parsing PMU data
 """
 
-from . import pmuDataFrame as pdf
 from .client import Client
 from .pmuCommandFrame import CommandFrame
 from .pmuConfigFrame import ConfigFrame
+from .pmuDataFrame import AggPhasor
+from .pmuLib import bytesToHexStr
 
 MAXFRAMESIZE = 65535
 
@@ -62,10 +63,10 @@ def readConfigFrame2(cli, debug=False):
     configFrame = None
 
     s = cli.readSample(4)
-    configFrame = ConfigFrame(pdf.bytesToHexStr(s), debug)
+    configFrame = ConfigFrame(bytesToHexStr(s), debug)
     expSize = configFrame.framesize
     s = cli.readSample(expSize - 4)
-    configFrame.frame = configFrame.frame + pdf.bytesToHexStr(s).upper()
+    configFrame.frame = configFrame.frame + bytesToHexStr(s).upper()
     configFrame.finishParsing()
 
     return configFrame
@@ -85,14 +86,14 @@ def getDataSample(rcvr, debug=False):
 
     if isinstance(rcvr, Client):
         introHexStrSize = 4
-        introHexStr = pdf.bytesToHexStr(rcvr.readSample(introHexStrSize))
+        introHexStr = bytesToHexStr(rcvr.readSample(introHexStrSize))
         totalFrameLength = int(introHexStr[5:], 16)
         lenToRead = totalFrameLength - introHexStrSize
-        remainingHexStr = pdf.bytesToHexStr(rcvr.readSample(lenToRead))
+        remainingHexStr = bytesToHexStr(rcvr.readSample(lenToRead))
 
         fullHexStr = introHexStr + remainingHexStr
     else:
-        fullHexStr = pdf.bytesToHexStr(rcvr.readSample(64000))
+        fullHexStr = bytesToHexStr(rcvr.readSample(64000))
 
     return fullHexStr
 
@@ -165,7 +166,7 @@ def createAggPhasors(configFrame):
             if s.phunits[p].voltORcurr == "CURRENT":
                 theUnit = "AMPS"
             phasors.append(
-                pdf.AggPhasor(s.stn.strip() + "/" + s.channels[p].strip(), theUnit)
+                AggPhasor(s.stn.strip() + "/" + s.channels[p].strip(), theUnit)
             )
 
         pmus.append(phasors)
