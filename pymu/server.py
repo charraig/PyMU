@@ -1,7 +1,5 @@
 import socket
-import sys
-import os
-import time
+
 
 class Server:
     """
@@ -15,19 +13,18 @@ class Server:
     :param printInfo: Specifies whether or not to print debug statements
     :type printInfo: bool
     """
-    
-    def __init__(self, thePort, proto="TCP", printInfo=False):
 
+    def __init__(self, thePort, proto="TCP", printInfo=False):
         self.serverIP = None
         self.socketConn = None
         self.connection = None
         self.clientAddr = None
         self.serverAddr = ""
         self.printInfo = printInfo
-        
+
         self.serverPort = thePort
         self.serverAddr = (self.serverAddr, self.serverPort)
-        if (proto.lower() == "udp"):
+        if proto.lower() == "udp":
             self.useUdp = True
         else:
             self.useUdp = False
@@ -82,13 +79,13 @@ class Server:
             self.socketConn.close()
         else:
             print("Stopping server...") if self.printInfo else None
-            #self.connection.close()
-        
+            # self.connection.close()
+
         print("Stopping", self.serverAddr) if self.printInfo else None
 
     def setTimeout(self, numOfSecs):
         """Set socket timeout
-        
+
         :param numOfSecs: Time to wait for socket action to complete before throwing timeout exception
         :type numOfSecs: int
         """

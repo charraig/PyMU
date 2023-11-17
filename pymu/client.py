@@ -1,7 +1,8 @@
+import os
 import socket
 import sys
-import os
 import time
+
 
 class Client:
     """
@@ -19,7 +20,6 @@ class Client:
     """
 
     def __init__(self, theDestIp, theDestPort, proto="TCP", sockType="INET"):
-    
         self.srcIp = None
         self.srcPort = None
         self.destAddr = None
@@ -36,12 +36,12 @@ class Client:
             self.useUdp = True
         if sockType.upper() == "UNIX":
             self.unixSock = True
-        
+
         self.createSocket()
         self.connectToDest()
 
     def createSocket(self):
-        """Create socket based on constructor arguments""" 
+        """Create socket based on constructor arguments"""
         if self.useUdp:
             if self.unixSock:
                 self.theSocket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -75,7 +75,7 @@ class Client:
                 return self.theSocket.recvfrom(bytesToRead)
             else:
                 return self.theSocket.recv(bytesToRead)
-        except (socket.timeout):
+        except socket.timeout:
             print("Socket Timeout")
             return ""
 
@@ -99,7 +99,7 @@ class Client:
 
     def setTimeout(self, numOfSecs):
         """Set socket timeout
-        
+
         :param numOfSecs: Time to wait for socket action to complete before throwing timeout exception
         :type numOfSecs: int
         """
