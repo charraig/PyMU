@@ -23,6 +23,11 @@ def turnDataOff(cli, idcode):
     cli.sendData(cmdOff.fullFrameBytes)
 
 
+def dataoff_and_close(cli, idcode):
+    turnDataOff(cli, idcode)
+    cli.stop()
+
+
 def turnDataOn(cli, idcode):
     """
     Send command to turn on real-time data

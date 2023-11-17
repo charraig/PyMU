@@ -1,6 +1,8 @@
 from datetime import datetime
-from .pmuEnum import *
-from .pmuLib import *
+
+from .pmuEnum import FrameType
+from .pmuLib import hexToBin
+
 
 class PMUFrame:
     """
@@ -21,7 +23,7 @@ class PMUFrame:
         :param debug: Print debug statements or not
         :type debug: bool
         """
-     
+
         self.length = 0
 
         self.dbg = debug
@@ -31,8 +33,9 @@ class PMUFrame:
 
     def finishParsing(self):
         """
-        When getting the config frame, the size is unknown.  After creating a PMUFrame with the first 4 bytes, the remaining frame bytes are read
-        and added to self.frame.  Once that is populated the remaining fields can be parsed
+        When getting the config frame, the size is unknown.  After creating a PMUFrame
+        with the first 4 bytes, the remaining frame bytes are read and added to
+        self.frame.  Once that is populated the remaining fields can be parsed.
         """
         self.parseIDCODE()
         self.parseSOC()
@@ -47,29 +50,39 @@ class PMUFrame:
     def parseFRAMESIZE(self):
         """Parse frame size"""
         framesizeSize = 4
-        self.framesize = int(self.frame[self.length:self.length+framesizeSize], 16)
+        self.framesize = int(self.frame[self.length : self.length + framesizeSize], 16)
         self.updateLength(framesizeSize)
         print("FRAMESIZE: ", self.framesize) if self.dbg else None
 
     def parseIDCODE(self):
         """Parse data stream ID number"""
         idcodeSize = 4
-        self.idcode = int(self.frame[self.length:self.length+idcodeSize], 16)
+        self.idcode = int(self.frame[self.length : self.length + idcodeSize], 16)
         self.updateLength(idcodeSize)
         print("IDCODE: ", self.idcode) if self.dbg else None
 
     def parseSOC(self):
         """Parse second-of-century timestamp"""
         socSize = 8
-        self.soc = SOC(self.frame[self.length:self.length+socSize])
+        self.soc = SOC(self.frame[self.length : self.length + socSize])
         self.updateLength(socSize)
 
     def parseFRACSEC(self):
         """Parse fraction of second and time quality word"""
         fracsecSize = 6
         messageTimeQualitySize = 2
-        self.message_time_quality = int(self.frame[self.length:self.length + messageTimeQualitySize], 16)
-        self.fracsec = int(self.frame[self.length + messageTimeQualitySize:self.length + messageTimeQualitySize + fracsecSize], 16)
+        self.message_time_quality = int(
+            self.frame[self.length : (self.length + messageTimeQualitySize)], 16
+        )
+        self.fracsec = int(
+            self.frame[
+                self.length
+                + messageTimeQualitySize : (
+                    self.length + messageTimeQualitySize + fracsecSize
+                )
+            ],
+            16,
+        )
         self.updateLength(messageTimeQualitySize + fracsecSize)
         print("FRACSEC: ", self.fracsec) if self.dbg else None
 
@@ -83,6 +96,7 @@ class PMUFrame:
         """Keeps track of index for overall frame"""
         self.length = self.length + sizeToAdd
 
+
 class SYNC:
     """Class for describing the frame synchronization word
 
@@ -91,7 +105,7 @@ class SYNC:
     :param debug: Print debug statements
     :type debug: bool
     """
-    
+
     def __init__(self, syncHexStr, debug=False):
         self.dbg = debug
         self.syncHex = syncHexStr
@@ -110,6 +124,7 @@ class SYNC:
         versBinStr = hexToBin(self.syncHex[3], 4)
         self.frameVers = int(versBinStr, 2)
         print("Vers: ", self.frameVers) if self.dbg else None
+
 
 class SOC:
     """Class for second-of-century (SOC) word (32 bit unsigned)
@@ -137,7 +152,8 @@ class SOC:
         self.mi = parsedDate.minute
         self.ss = parsedDate.second
         self.ff = 0
-        self.formatted = "{:0>4}/{:0>2}/{:0>2} {:0>2}:{:0>2}:{:0>2}".format(self.yyyy, self.mm, self.dd, self.hh, self.mi, self.ss)
-        dt = datetime(self.yyyy, self.mm, self.dd, self.hh, self.mi, self.ss) 
+        self.formatted = "{:0>4}/{:0>2}/{:0>2} {:0>2}:{:0>2}:{:0>2}".format(
+            self.yyyy, self.mm, self.dd, self.hh, self.mi, self.ss
+        )
+        dt = datetime(self.yyyy, self.mm, self.dd, self.hh, self.mi, self.ss)
         self.utcSec = (dt - datetime(1970, 1, 1)).total_seconds()
-

@@ -1,5 +1,6 @@
 """
-File containing all the enums used for PyMU.  For detailed explanations please look at C37.118-2005 standard
+File containing all the enums used for PyMU.  
+For detailed explanations please look at C37.118-2005 standard
 """
 
 from enum import Enum
@@ -99,6 +100,14 @@ class TriggerReason(Enum):
     DF_DT_HI = 5
     RESERVED = 6
     DIGITAL = 7
+    CUSTOM08 = 8
+    CUSTOM09 = 9
+    CUSTOM10 = 10
+    CUSTOM11 = 11
+    CUSTOM12 = 12
+    CUSTOM13 = 13
+    CUSTOM14 = 14
+    CUSTOM15 = 15
 
 
 class Command(Enum):
