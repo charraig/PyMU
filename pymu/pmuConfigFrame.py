@@ -186,9 +186,11 @@ class Station:
         self.channels = [None] * self.numOfChns
         shift = 32
         for i in range(0, self.numOfChns):
-            self.channels[i] = bytes.fromhex(
-                self.stationFrame[self.length : (self.length + shift)]
-            ).decode("ascii")
+            self.channels[i] = (
+                bytes.fromhex(self.stationFrame[self.length : (self.length + shift)])
+                .split(b"\x00", 1)[0]
+                .decode("ascii")
+            )
             self.updateLength(shift)
             print(self.channels[i]) if self.dbg else None
 
