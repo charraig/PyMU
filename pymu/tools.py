@@ -2,10 +2,10 @@
 Tools for common functions relayed to commanding, reading, and parsing PMU data
 """
 
-import pmuDataFrame as pdf
-from client import Client
-from pmuCommandFrame import CommandFrame
-from pmuConfigFrame import ConfigFrame
+from . import pmuDataFrame as pdf
+from .client import Client
+from .pmuCommandFrame import CommandFrame
+from .pmuConfigFrame import ConfigFrame
 
 MAXFRAMESIZE = 65535
 
