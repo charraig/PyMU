@@ -76,25 +76,30 @@ def readConfigFrame2(cli, debug=False):
     return configFrame
 
 
-def getDataSample(rcvr, debug=False):
+def getDataSample(rcvr, total_bytes=-1, debug=False):
     """
     Get a data sample regardless of TCP or UDP connection
 
     :param rcvr: Object used for receiving data frames
     :type rcvr: :class:`Client`/:class:`Server`
+    :type total_bytes: int
+    :param total_bytes: indicate how many bytes to read, or indicate to read from header
     :param debug: Print debug statements
     :type debug: bool
     :return: Data frame in hex string format
     """
-    fullHexStr = ""
 
     if isinstance(rcvr, Client):
-        introHexStrSize = 4
-        introHexStr = bytesToHexStr(rcvr.readSample(introHexStrSize))
-        totalFrameLength = int(introHexStr[5:], 16)
-        lenToRead = totalFrameLength - introHexStrSize
-        remainingHexStr = bytesToHexStr(rcvr.readSample(lenToRead))
+        if total_bytes == -1:
+            introHexStrSize = 4
+            introHexStr = bytesToHexStr(rcvr.readSample(introHexStrSize))
+            total_bytes = int(introHexStr[5:], 16)
+        else:
+            introHexStrSize = 0
+            introHexStr = ""
 
+        lenToRead = total_bytes - introHexStrSize
+        remainingHexStr = bytesToHexStr(rcvr.readSample(lenToRead))
         fullHexStr = introHexStr + remainingHexStr
     else:
         fullHexStr = bytesToHexStr(rcvr.readSample(64000))
