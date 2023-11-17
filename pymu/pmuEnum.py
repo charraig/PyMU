@@ -4,6 +4,7 @@ File containing all the enums used for PyMU.  For detailed explanations please l
 
 from enum import Enum
 
+
 class FrameType(Enum):
     Data = 0
     Header = 1
@@ -12,26 +13,32 @@ class FrameType(Enum):
     Command = 4
     Config3 = 5
 
+
 class NumType(Enum):
     INTEGER = 0
     FLOAT = 1
+
 
 class PhsrFmt(Enum):
     RECT = 0
     POLAR = 1
 
+
 class FundFreq(Enum):
     HZ60 = 0
     HZ50 = 1
+
 
 class MeasurementType(Enum):
     VOLTAGE = 0
     CURRENT = 1
 
+
 class AnlgMsrmnt(Enum):
     INSTANTANEOUS = 0
     RMS = 1
     PEAK = 2
+
 
 class DataError(Enum):
     GOOD = 0
@@ -39,25 +46,31 @@ class DataError(Enum):
     TESTMODE = 2
     PMUERROR_NOVALUES = 3
 
+
 class PmuSync(Enum):
     UTCSOURCE = 0
     NO_UTCSOURCE = 1
+
 
 class Sorting(Enum):
     TIMESTAMP = 0
     ARRIVAL = 1
 
+
 class Trigger(Enum):
     NO_TRIGGER = 0
     TRIGGER = 1
+
 
 class ConfigChange(Enum):
     DID_CHANGE = 0
     WILL_CHANGE = 1
 
+
 class DataModified(Enum):
     OTHER = 0
     POSTPROCESSING = 1
+
 
 class TimeQuality(Enum):
     NOT_USED = 0
@@ -69,11 +82,13 @@ class TimeQuality(Enum):
     ERR_LT10_MS = 6
     ERR_GT10_MS_UNKNOWN = 7
 
+
 class UnlockedTime(Enum):
     LOCKED_LT10S = 0
     BTWN_10S_100S = 1
     BTWN_100S_1000S = 2
     GT_1000S = 3
+
 
 class TriggerReason(Enum):
     MANUAL = 0
@@ -85,6 +100,7 @@ class TriggerReason(Enum):
     RESERVED = 6
     DIGITAL = 7
 
+
 class Command(Enum):
     UNDEFINED = 0
     DATAOFF = 1
@@ -93,7 +109,8 @@ class Command(Enum):
     CONFIG1 = 4
     CONFIG2 = 5
     CONFIG3 = 6
- 
+
+
 class Unit(Enum):
     VOLTS = 0
     AMPS = 1
