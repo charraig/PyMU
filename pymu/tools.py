@@ -5,7 +5,6 @@ Tools for common functions relayed to commanding, reading, and parsing PMU data
 from .client import Client
 from .pmuCommandFrame import CommandFrame
 from .pmuConfigFrame import ConfigFrame
-from .pmuDataFrame import AggPhasor
 from .pmuLib import bytesToHexStr
 
 MAXFRAMESIZE = 65535
