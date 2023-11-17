@@ -76,7 +76,7 @@ def readConfigFrame2(cli, debug=False):
     return configFrame
 
 
-def getDataSample(rcvr, total_bytes=-1, debug=False):
+def getDataSampleBytes(rcvr, total_bytes=-1, debug=False):
     """
     Get a data sample regardless of TCP or UDP connection
 
@@ -91,20 +91,26 @@ def getDataSample(rcvr, total_bytes=-1, debug=False):
 
     if isinstance(rcvr, Client):
         if total_bytes == -1:
-            introHexStrSize = 4
-            introHexStr = bytesToHexStr(rcvr.readSample(introHexStrSize))
+            introBytesStrSize = 4
+            intro_bytes = rcvr.readSample(introBytesStrSize)
+            introHexStr = bytesToHexStr(intro_bytes)
             total_bytes = int(introHexStr[5:], 16)
         else:
-            introHexStrSize = 0
-            introHexStr = ""
+            introBytesStrSize = 0
+            intro_bytes = b""
 
-        lenToRead = total_bytes - introHexStrSize
-        remainingHexStr = bytesToHexStr(rcvr.readSample(lenToRead))
-        fullHexStr = introHexStr + remainingHexStr
+        lenToRead = total_bytes - introBytesStrSize
+        payload_bytes = rcvr.readSample(lenToRead)
+        full_bytes_str = intro_bytes + payload_bytes
     else:
-        fullHexStr = bytesToHexStr(rcvr.readSample(64000))
+        full_bytes_str = rcvr.readSample(64000)
 
-    return fullHexStr
+    return full_bytes_str
+
+
+def getDataSample(rcvr, total_bytes=-1, debug=False):
+    full_bytes_str = getDataSampleBytes(rcvr, total_bytes, debug)
+    return bytesToHexStr(full_bytes_str)
 
 
 def startDataCapture(idcode, ip, port=4712, tcpUdp="TCP", debug=False):
