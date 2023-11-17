@@ -1,11 +1,10 @@
-import codecs
 import math
 import struct
 from datetime import datetime
 
-from .pmuEnum import *
+from . import pmuEnum as enums
 from .pmuFrame import PMUFrame
-from .pmuLib import *
+from .pmuLib import hexToBin
 
 
 class DataFrame(PMUFrame):
@@ -322,47 +321,55 @@ class Stat:
 
     def parseDataError(self):
         """Parse data error bits"""
-        self.dataError = DataError(int(hexToBin(self.statHex[0], 4)[:2], 2)).name
+        self.dataError = enums.DataError(int(hexToBin(self.statHex[0], 4)[:2], 2)).name
         print("STAT: ", self.dataError) if self.dbg else None
 
     def parsePmuSync(self):
         """Parse PMU sync bit"""
-        self.pmuSync = PmuSync(int(hexToBin(self.statHex[0], 4)[2], 2)).name
+        self.pmuSync = enums.PmuSync(int(hexToBin(self.statHex[0], 4)[2], 2)).name
         print("PMUSYNC: ", self.pmuSync) if self.dbg else None
 
     def parseSorting(self):
         """Parse data sorting bit"""
-        self.sorting = Sorting(int(hexToBin(self.statHex[0], 4)[3], 2)).name
+        self.sorting = enums.Sorting(int(hexToBin(self.statHex[0], 4)[3], 2)).name
         print("SORTING: ", self.sorting) if self.dbg else None
 
     def parsePmuTrigger(self):
         """Parse PMU trigger bit"""
-        self.pmuTrigger = Trigger(int(hexToBin(self.statHex[1], 4)[0], 2)).name
+        self.pmuTrigger = enums.Trigger(int(hexToBin(self.statHex[1], 4)[0], 2)).name
         print("PMUTrigger: ", self.pmuTrigger) if self.dbg else None
 
     def parseConfigChange(self):
         """Parse config change bit"""
-        self.configChange = ConfigChange(int(hexToBin(self.statHex[1], 4)[1], 2)).name
+        self.configChange = enums.ConfigChange(
+            int(hexToBin(self.statHex[1], 4)[1], 2)
+        ).name
         print("ConfigChange: ", self.configChange) if self.dbg else None
 
     def parseDataModified(self):
         """Parse data modified bit"""
-        self.dataModified = DataModified(int(hexToBin(self.statHex[1], 4)[2], 2)).name
+        self.dataModified = enums.DataModified(
+            int(hexToBin(self.statHex[1], 4)[2], 2)
+        ).name
         print("DataModified: ", self.dataModified) if self.dbg else None
 
     def parseTimeQuality(self):
         """Parse time quality bits"""
-        self.unlockedTime = TimeQuality(
+        self.unlockedTime = enums.TimeQuality(
             int(hexToBin(self.statHex[1:3], 8)[3:6], 2)
         ).name
         print("TimeQuality: ", self.unlockedTime) if self.dbg else None
 
     def parseUnlockTime(self):
         """Parse unlocked time bits"""
-        self.unlockedTime = UnlockedTime(int(hexToBin(self.statHex[2], 4)[2:], 2)).name
+        self.unlockedTime = enums.UnlockedTime(
+            int(hexToBin(self.statHex[2], 4)[2:], 2)
+        ).name
         print("UnlockTime: ", self.unlockedTime) if self.dbg else None
 
     def parseTriggerReason(self):
         """Parse trigger reason bits"""
-        self.triggerReason = TriggerReason(int(hexToBin(self.statHex[3], 4), 2)).name
+        self.triggerReason = enums.TriggerReason(
+            int(hexToBin(self.statHex[3], 4), 2)
+        ).name
         print("TriggerReason: ", self.triggerReason) if self.dbg else None
