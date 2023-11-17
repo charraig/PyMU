@@ -2,10 +2,9 @@
 Class for parsing Config Frame 1 or 2
 """
 
-from pmuLib import hexToBin
-
 from . import pmuEnum as pe
 from .pmuFrame import PMUFrame
+from .pmuLib import hexToBin
 
 
 class ConfigFrame(PMUFrame):

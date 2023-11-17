@@ -3,8 +3,9 @@ import socket
 
 class Server:
     """
-    Server class that creates a server and provides simple functions for incoming connections/data from PMUs or PDCs without needing
-    to directly use Python's socket library.  Supports INET sockets only (will eventually be updated).
+    Server class that creates a server and provides simple functions for incoming
+    connections/data from PMUs or PDCs without needing to directly use Python's
+    socket library.  Supports INET sockets only (will eventually be updated).
 
     :param thePort: Local port to listen on
     :type thePort: int
@@ -58,12 +59,13 @@ class Server:
         self.connection, self.clientAddr = self.socketConn.accept()
 
     def readSample(self, length):
-        """Will read exactly exactly as many bytes as specified by length and return them as an int"""
+        """Will read exactly exactly as many bytes as specified by length and return
+        them as an int"""
         data = ""
         if self.useUdp:
             data, address = self.socketConn.recvfrom(length)
         else:
-            if self.connection == None:
+            if self.connection is None:
                 self.waitForConnection()
             data = self.connection.recv(length)
 
@@ -86,7 +88,8 @@ class Server:
     def setTimeout(self, numOfSecs):
         """Set socket timeout
 
-        :param numOfSecs: Time to wait for socket action to complete before throwing timeout exception
+        :param numOfSecs: Time to wait for socket action to complete before throwing
+          timeout exception
         :type numOfSecs: int
         """
         self.socketConn.settimeout(numOfSecs)
