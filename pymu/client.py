@@ -18,7 +18,9 @@ class Client:
     :type sockType: str
     """
 
-    def __init__(self, theDestIp, theDestPort, proto="TCP", sockType="INET"):
+    def __init__(
+        self, theDestIp, theDestPort, proto="TCP", timeout=60, sockType="INET"
+    ):
         self.srcIp = None
         self.srcPort = None
         self.destAddr = None
@@ -37,6 +39,7 @@ class Client:
             self.unixSock = True
 
         self.createSocket()
+        self.setTimeout(timeout)
         self.connectToDest()
 
     def createSocket(self):
@@ -69,14 +72,14 @@ class Client:
 
         :return: Byte array of data read from socket
         """
-        try:
+        byte_str = b""
+
+        while len(byte_str) < bytesToRead:
+            need_to_read = bytesToRead - len(byte_str)
             if self.useUdp:
-                byte_str = self.theSocket.recvfrom(bytesToRead)
+                byte_str += self.theSocket.recvfrom(need_to_read)
             else:
-                byte_str = self.theSocket.recv(bytesToRead)
-        except socket.timeout:
-            print("Socket Timeout")
-            byte_str = b""
+                byte_str += self.theSocket.recv(need_to_read)
         return byte_str
 
     def sendData(self, bytesToSend):

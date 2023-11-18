@@ -5,6 +5,7 @@ Tools for common functions relayed to commanding, reading, and parsing PMU data
 from .client import Client
 from .pmuCommandFrame import CommandFrame
 from .pmuConfigFrame import ConfigFrame
+from .pmuDataFrame import DataFrame
 from .pmuLib import bytesToHexStr
 
 MAXFRAMESIZE = 65535
@@ -108,12 +109,12 @@ def getDataSampleBytes(rcvr, total_bytes=-1, debug=False):
     return full_bytes_str
 
 
-def getDataSample(rcvr, total_bytes=-1, debug=False):
+def getDataSampleHex(rcvr, total_bytes=-1, debug=False):
     full_bytes_str = getDataSampleBytes(rcvr, total_bytes, debug)
     return bytesToHexStr(full_bytes_str)
 
 
-def startDataCapture(idcode, ip, port=4712, tcpUdp="TCP", debug=False):
+def startDataStream(idcode, ip, port=4712, tcpUdp="TCP", debug=False):
     """
     Connect to data source, request config frame, send data start command
 
@@ -131,7 +132,6 @@ def startDataCapture(idcode, ip, port=4712, tcpUdp="TCP", debug=False):
     :return: Populated :py:class:`pymu.pmuConfigFrame.ConfigFrame` object
     """
     configFrame = None
-
     cli = Client(ip, port, tcpUdp)
     cli.setTimeout(5)
 
@@ -140,9 +140,12 @@ def startDataCapture(idcode, ip, port=4712, tcpUdp="TCP", debug=False):
         configFrame = readConfigFrame2(cli, debug)
 
     turnDataOn(cli, idcode)
+    d = getDataSampleBytes(cli)
+    dFrame = DataFrame(d, configFrame)
+    dataframe_bytes = dFrame.framesize
     cli.stop()
 
-    return configFrame
+    return configFrame, dataframe_bytes
 
 
 def getStations(configFrame):
