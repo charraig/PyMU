@@ -140,8 +140,8 @@ def startDataStream(idcode, ip, port=4712, tcpUdp="TCP", debug=False):
         configFrame = readConfigFrame2(cli, debug)
 
     turnDataOn(cli, idcode)
-    d = getDataSampleBytes(cli)
-    dFrame = DataFrame(d, configFrame)
+    data = getDataSampleHex(cli)
+    dFrame = DataFrame(data, configFrame)
     dataframe_bytes = dFrame.framesize
     cli.stop()
 
