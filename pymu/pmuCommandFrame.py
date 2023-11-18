@@ -1,13 +1,16 @@
-from .pmuFrame import PMUFrame
-from .pmuEnum import *
-from time import time
 from datetime import datetime
-from PyCRC.CRCCCITT import CRCCCITT
+from time import time
+
+from pycrc.CRCCCITT import CRCCCITT
+
+from .pmuEnum import Command
+from .pmuFrame import PMUFrame
+
 
 class CommandFrame(PMUFrame):
 
     """
-    Class for creating a Command Frame based on C37.118-2005  
+    Class for creating a Command Frame based on C37.118-2005
 
     :param commandStr: Command to send
     :type commandStr: str
@@ -18,8 +21,9 @@ class CommandFrame(PMUFrame):
     """
 
     def __init__(self, commandStr, pmuIdInt, debug=False):
-
-        self.length = 0 # Monitored as fields are added then inserted back into command frame before doing CRC
+        self.length = 0
+        # Length monitored as fields are added then
+        # inserted back into command frame before doing CRC
 
         self.dbg = debug
         self.command = Command[commandStr.upper()]
@@ -28,13 +32,22 @@ class CommandFrame(PMUFrame):
 
     def createCommand(self):
         """Create each field based on the command to send and the frame ID"""
-        self.sync = self.genSync() # Command frame sync bytes
-        self.idcode = self.genIdcode() 
+        self.sync = self.genSync()  # Command frame sync bytes
+        self.idcode = self.genIdcode()
         self.soc = self.genSoc()
         self.fracsec = self.genFracsec()
         self.commandHex = self.genCmd()
-        self.framesize = hex(int((self.length+8)/2))[2:].zfill(4) # No support for extended frame yet 
-        cmdHex = self.sync + self.framesize + self.idcode + self.soc + self.fracsec + self.commandHex
+        self.framesize = hex(int((self.length + 8) / 2))[2:].zfill(
+            4
+        )  # No support for extended frame yet
+        cmdHex = (
+            self.sync
+            + self.framesize
+            + self.idcode
+            + self.soc
+            + self.fracsec
+            + self.commandHex
+        )
         self.genChk(cmdHex)
         cmdHex = cmdHex + self.chk
         self.fullFrameHexStr = cmdHex.upper()
@@ -52,7 +65,7 @@ class CommandFrame(PMUFrame):
     def genIdcode(self):
         """:return: ID code field bytes as hex str"""
         self.updateLength(4)
-        return self.pmuId[2:].zfill(4).upper() 
+        return self.pmuId[2:].zfill(4).upper()
 
     def genSoc(self):
         """Generate second of century based on current time
@@ -72,7 +85,7 @@ class CommandFrame(PMUFrame):
         self.updateLength(8)
         now = datetime.now()
         hex_val = hex(now.microsecond)[2:].zfill(8)
-        return hex_val.upper() 
+        return hex_val.upper()
 
     def genCmd(self):
         """Generate command as hex str
@@ -85,7 +98,7 @@ class CommandFrame(PMUFrame):
 
     def genChk(self, crcInputData):
         """Generate CRC-CCITT based on command frame"""
-        crcCalc = CRCCCITT('FFFF')
+        crcCalc = CRCCCITT("FFFF")
         frameInBytes = bytes.fromhex(crcInputData)
         theCrc = hex(crcCalc.calculate(frameInBytes))[2:].zfill(4)
         self.chk = theCrc.upper()

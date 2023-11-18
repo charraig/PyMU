@@ -5,6 +5,7 @@ Commonly used functions for parsing PMU Frames
 import codecs
 import struct
 
+
 def hexToBin(hexStr, numOfBits):
     """Converts hex string to binary
 
@@ -17,6 +18,7 @@ def hexToBin(hexStr, numOfBits):
     """
     return bin(int(hexStr, 16))[2:].zfill(numOfBits)
 
+
 def bytesToHexStr(bytesInput):
     """Converts byte array to hex str
 
@@ -25,8 +27,9 @@ def bytesToHexStr(bytesInput):
 
     :return: Hex string representing bytesInput
     """
-    
-    return codecs.encode(bytesInput, 'hex').decode('ascii')
+
+    return codecs.encode(bytesInput, "hex").decode("ascii")
+
 
 def doubleToHex(f):
     """Converts double to hex
@@ -36,7 +39,8 @@ def doubleToHex(f):
 
     :return: Hex representation of double value
     """
-    return hex(struct.unpack('!Q', struct.pack('!d', f))[0])
+    return hex(struct.unpack("!Q", struct.pack("!d", f))[0])
+
 
 def doubleToHexStr(f):
     """Converts double to hex str
@@ -46,7 +50,8 @@ def doubleToHexStr(f):
 
     :return: Hex string representation of double value
     """
-    return hex(struct.unpack('!Q', struct.pack('!d', f))[0])[2:]
+    return hex(struct.unpack("!Q", struct.pack("!d", f))[0])[2:]
+
 
 def doubleToBytes(f):
     """Converts double to byte array
@@ -56,7 +61,8 @@ def doubleToBytes(f):
 
     :return: Byte array representation of double value
     """
-    return struct.pack('d', f)
+    return struct.pack("d", f)
+
 
 def bytesToFloat(b):
     """Converts byte array to double
@@ -66,7 +72,8 @@ def bytesToFloat(b):
 
     :return: Float value
     """
-    return struct.unpack('d', b)[0]
+    return struct.unpack("d", b)[0]
+
 
 def intToBytes(i):
     """Converts unsigned int to byte array
@@ -76,7 +83,8 @@ def intToBytes(i):
 
     :return: Byte array representing i
     """
-    return struct.pack('!I', i)
+    return struct.pack("!I", i)
+
 
 def intToHexStr(i):
     """Converts int to hex

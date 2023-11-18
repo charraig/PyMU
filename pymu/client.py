@@ -1,14 +1,14 @@
 import socket
-import sys
-import os
-import time
+
 
 class Client:
     """
-    Client class that creates a client and provides simple functions for connecting to PMUs or PDCs without needing
-    to directly use Python's socket library.  Supports INET and UNIX sockets
+    Client class that creates a client and provides simple functions for connecting to
+    PMUs or PDCs without needing to directly use Python's socket library.
+    Supports INET and UNIX sockets
 
-    :param theDestIp: IP address to connect to.  If using unix socket this is the file name to connect to
+    :param theDestIp: IP address to connect to.  If using unix socket this is
+      the file name to connect to
     :type theDestIp: str
     :param theDestPort: Port to connect to
     :type theDestPort: int
@@ -18,8 +18,9 @@ class Client:
     :type sockType: str
     """
 
-    def __init__(self, theDestIp, theDestPort, proto="TCP", sockType="INET"):
-    
+    def __init__(
+        self, theDestIp, theDestPort, proto="TCP", timeout=60, sockType="INET"
+    ):
         self.srcIp = None
         self.srcPort = None
         self.destAddr = None
@@ -36,12 +37,13 @@ class Client:
             self.useUdp = True
         if sockType.upper() == "UNIX":
             self.unixSock = True
-        
+
         self.createSocket()
+        self.setTimeout(timeout)
         self.connectToDest()
 
     def createSocket(self):
-        """Create socket based on constructor arguments""" 
+        """Create socket based on constructor arguments"""
         if self.useUdp:
             if self.unixSock:
                 self.theSocket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -70,14 +72,15 @@ class Client:
 
         :return: Byte array of data read from socket
         """
-        try:
+        byte_str = b""
+
+        while len(byte_str) < bytesToRead:
+            need_to_read = bytesToRead - len(byte_str)
             if self.useUdp:
-                return self.theSocket.recvfrom(bytesToRead)
+                byte_str += self.theSocket.recvfrom(need_to_read)
             else:
-                return self.theSocket.recv(bytesToRead)
-        except (socket.timeout):
-            print("Socket Timeout")
-            return ""
+                byte_str += self.theSocket.recv(need_to_read)
+        return byte_str
 
     def sendData(self, bytesToSend):
         """Send bytes to destination
@@ -99,8 +102,9 @@ class Client:
 
     def setTimeout(self, numOfSecs):
         """Set socket timeout
-        
-        :param numOfSecs: Time to wait for socket action to complete before throwing timeout exception
+
+        :param numOfSecs: Time to wait for socket action to complete before
+          throwing timeout exception
         :type numOfSecs: int
         """
         self.theSocket.settimeout(numOfSecs)
