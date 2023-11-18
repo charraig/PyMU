@@ -71,12 +71,13 @@ class Client:
         """
         try:
             if self.useUdp:
-                return self.theSocket.recvfrom(bytesToRead)
+                byte_str = self.theSocket.recvfrom(bytesToRead)
             else:
-                return self.theSocket.recv(bytesToRead)
+                byte_str = self.theSocket.recv(bytesToRead)
         except socket.timeout:
             print("Socket Timeout")
-            return ""
+            byte_str = b""
+        return byte_str
 
     def sendData(self, bytesToSend):
         """Send bytes to destination
