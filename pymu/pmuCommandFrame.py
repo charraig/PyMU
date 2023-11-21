@@ -1,7 +1,7 @@
 from datetime import datetime
 from time import time
 
-from pycrc.CRCCCITT import CRCCCITT
+from PyCRC.CRCCCITT import CRCCCITT
 
 from .pmuEnum import Command
 from .pmuFrame import PMUFrame

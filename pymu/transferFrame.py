@@ -1,6 +1,6 @@
 from struct import pack
 
-from pycrc.CRCCCITT import CRCCCITT
+from PyCRC.CRCCCITT import CRCCCITT
 
 from . import pmuLib as pl
 
