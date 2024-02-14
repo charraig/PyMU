@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime
 from time import time
 
@@ -8,7 +9,6 @@ from .pmuFrame import PMUFrame
 
 
 class CommandFrame(PMUFrame):
-
     """
     Class for creating a Command Frame based on C37.118-2005
 
@@ -52,6 +52,7 @@ class CommandFrame(PMUFrame):
         cmdHex = cmdHex + self.chk
         self.fullFrameHexStr = cmdHex.upper()
         self.fullFrameBytes = bytes.fromhex(self.fullFrameHexStr)
+        self.fullFrameBase64 = base64.b64encode(self.fullFrameBytes).decode("utf-8")
 
     # # # # # #
     # Methods follow fields in Command Frame.

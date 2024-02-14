@@ -1,7 +1,70 @@
 import socket
 
+import requests
 
-class Client:
+
+class Endpoint:
+    def __init__(self):
+        pass
+
+    def sendData(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def readSample(self):
+        pass
+
+
+class Proxy(Endpoint):
+    def __init__(self, url, auth=None):
+        super().__init__()
+        self.url = url
+        self.payload = None
+        self.session = requests.Session()
+        if auth is not None:
+            self.session.auth = auth
+
+    def readSample(self):
+        raise Exception("Proxy clients have no read ability.")
+
+
+class HologramProxy(Proxy):
+    def __init__(self, auth_type, auth_params):
+        if auth_type == "basic":
+            auth = ("apikey", auth_params["apikey"])
+            url = "https://dashboard.hologram.io/api/1/devices/messages"
+        elif auth_type == "webhook":
+            auth = None
+            did = auth_params["deviceid"]
+            whguid = auth_params["webhookguid"]
+            url = f"https://dashboard.hologram.io/api/1/devices/messages/{did}/{whguid}"
+        else:
+            raise ValueError("auth_type not recognized.")
+        super().__init__(url, auth)
+
+    def attach_core_payload(self, device_ids, protocol, port, wait_for_response):
+        self.payload = {
+            "deviceids": device_ids,
+            "protocol": protocol,
+            "port": port,
+            "waitForResponse": wait_for_response,
+        }
+
+    @staticmethod
+    def parse_response(response):
+        response_json = response.json()
+        status = "success" if response_json["success"] else "failed"
+        return {"status": status, "response": response}
+
+    def sendData(self, frame):
+        self.payload["data"] = frame.fullFrameBase64
+        response = self.session.post(self.url, json=self.payload)
+        return self.parse_response(response)
+
+
+class Client(Endpoint):
     """
     Client class that creates a client and provides simple functions for connecting to
     PMUs or PDCs without needing to directly use Python's socket library.
@@ -19,12 +82,15 @@ class Client:
     """
 
     def __init__(
-        self, theDestIp, theDestPort, proto="TCP", timeout=60, sockType="INET"
+        self,
+        theDestIp,
+        theDestPort,
+        protocol="TCP",
+        timeout=60,
+        sockType="INET",
     ):
-        self.srcIp = None
-        self.srcPort = None
+        super().__init__()
         self.destAddr = None
-        self.srcAddr = None
         self.theSocket = None
         self.theConnection = None
         self.useUdp = False
@@ -33,7 +99,8 @@ class Client:
         self.destIp = theDestIp
         self.destPort = theDestPort
         self.destAddr = (theDestIp, theDestPort)
-        if proto.upper() == "UDP":
+
+        if protocol == "UDP":
             self.useUdp = True
         if sockType.upper() == "UNIX":
             self.unixSock = True
@@ -82,12 +149,13 @@ class Client:
                 byte_str += self.theSocket.recv(need_to_read)
         return byte_str
 
-    def sendData(self, bytesToSend):
+    def sendData(self, frame):
         """Send bytes to destination
 
         :param bytesToSend: Number of bytes to send
         :type bytesToSend: int
         """
+        bytesToSend = frame.fullFrameBytes
         if self.useUdp:
             if self.unixSock:
                 self.theSocket.sendto(bytesToSend, self.destIp)
@@ -95,6 +163,7 @@ class Client:
                 self.theSocket.sendto(bytesToSend, self.destAddr)
         else:
             self.theSocket.send(bytesToSend)
+        return {"status": "unknown", "response": None}
 
     def stop(self):
         """Close the socket connection"""

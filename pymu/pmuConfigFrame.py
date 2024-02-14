@@ -2,9 +2,17 @@
 Class for parsing Config Frame 1 or 2
 """
 
+import pickle
+
 from . import pmuEnum as pe
 from .pmuFrame import PMUFrame
 from .pmuLib import hexToBin
+
+
+def import_config(filepath):
+    with open(filepath, "rb") as import_file:
+        config_frame = pickle.load(import_file)
+    return config_frame
 
 
 class ConfigFrame(PMUFrame):
@@ -18,6 +26,7 @@ class ConfigFrame(PMUFrame):
 
     def __init__(self, frameInHexStr, debug=False):
         super().__init__(frameInHexStr, debug)  # Parse words common to all frames first
+        self.dataframe_bytes = None
 
     def finishParsing(self):
         """After first 4 bytes are received, the client reads the remaining config
@@ -56,6 +65,13 @@ class ConfigFrame(PMUFrame):
         self.datarate = int(self.frame[self.length : self.length + datarateSize], 16)
         self.updateLength(datarateSize)
         print("DATARATE: ", self.datarate) if self.dbg else None
+
+    def update_dataframe_size(self, bytesize):
+        self.dataframe_bytes = bytesize
+
+    def export(self, filepath):
+        with open(filepath, "wb") as export_file:
+            pickle.dump(self, export_file)
 
 
 class TimeBase:
@@ -258,9 +274,11 @@ class Phunit:
         self.phunitHex = phunitHexStr
         self.parseVoltOrCurr()
         self.parseValue()
-        print(
-            "PHUNIT: ", self.voltORcurr, " - ", self.value, sep=""
-        ) if self.dbg else None
+        (
+            print("PHUNIT: ", self.voltORcurr, " - ", self.value, sep="")
+            if self.dbg
+            else None
+        )
 
     def parseVoltOrCurr(self):
         """Determine if measurement type is voltage or current"""
@@ -286,9 +304,11 @@ class Anunit:
         self.anunitHex = anunitHexStr
         self.parseAnlgMsrmnt()
         self.parseUserDefinedScale()
-        print(
-            "ANUNIT: ", self.anlgMsrmnt, " - ", self.userDefinedScale, sep=""
-        ) if self.dbg else None
+        (
+            print("ANUNIT: ", self.anlgMsrmnt, " - ", self.userDefinedScale, sep="")
+            if self.dbg
+            else None
+        )
 
     def parseAnlgMsrmnt(self):
         """Parse analog measurement type"""

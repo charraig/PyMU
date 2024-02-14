@@ -1,7 +1,9 @@
 import socket
 
+from pymu.client import Endpoint
 
-class Server:
+
+class Server(Endpoint):
     """
     Server class that creates a server and provides simple functions for incoming
     connections/data from PMUs or PDCs without needing to directly use Python's
@@ -16,11 +18,12 @@ class Server:
     """
 
     def __init__(self, thePort, proto="TCP", printInfo=False):
+        super().__init__()
         self.serverIP = None
         self.socketConn = None
         self.connection = None
         self.clientAddr = None
-        self.serverAddr = ""
+        self.serverAddr = "localhost"
         self.printInfo = printInfo
 
         self.serverPort = thePort
@@ -59,7 +62,7 @@ class Server:
         self.connection, self.clientAddr = self.socketConn.accept()
 
     def readSample(self, length):
-        """Will read exactly exactly as many bytes as specified by length and return
+        """Will read exactly as many bytes as specified by length and return
         them as an int"""
         data = ""
         if self.useUdp:
@@ -93,6 +96,9 @@ class Server:
         :type numOfSecs: int
         """
         self.socketConn.settimeout(numOfSecs)
+
+    def sendData(self):
+        raise Exception("Server endpoints have no send ability.")
 
     def __class__(self):
         return "server"

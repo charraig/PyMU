@@ -21,12 +21,14 @@ def turnDataOff(cli, idcode):
     :type idcode: int
     """
     cmdOff = CommandFrame("DATAOFF", idcode)
-    cli.sendData(cmdOff.fullFrameBytes)
+    response = cli.sendData(cmdOff)
+    return response
 
 
 def dataoff_and_close(cli, idcode):
-    turnDataOff(cli, idcode)
+    response = turnDataOff(cli, idcode)
     cli.stop()
+    return response
 
 
 def turnDataOn(cli, idcode):
@@ -39,7 +41,8 @@ def turnDataOn(cli, idcode):
     :type idcode: int
     """
     cmdOn = CommandFrame("DATAON", idcode)
-    cli.sendData(cmdOn.fullFrameBytes)
+    response = cli.sendData(cmdOn)
+    return response
 
 
 def requestConfigFrame2(cli, idcode):
@@ -52,7 +55,8 @@ def requestConfigFrame2(cli, idcode):
     :type idcode: int
     """
     cmdConfig2 = CommandFrame("CONFIG2", idcode)
-    cli.sendData(cmdConfig2.fullFrameBytes)
+    response = cli.sendData(cmdConfig2)
+    return response
 
 
 def readConfigFrame2(cli, debug=False):
@@ -104,7 +108,7 @@ def getDataSampleBytes(rcvr, total_bytes=-1, debug=False):
         payload_bytes = rcvr.readSample(lenToRead)
         full_bytes_str = intro_bytes + payload_bytes
     else:
-        full_bytes_str = rcvr.readSample(64000)
+        full_bytes_str = rcvr.readSample(8)
 
     return full_bytes_str
 
@@ -114,38 +118,49 @@ def getDataSampleHex(rcvr, total_bytes=-1, debug=False):
     return bytesToHexStr(full_bytes_str)
 
 
-def startDataStream(idcode, ip, port=4712, tcpUdp="TCP", debug=False):
+def getConfigFrame2(idcode, outgoing_client, incoming_client, compute_bytes=True):
+    response = requestConfigFrame2(outgoing_client, idcode)
+    if response["status"] == "success":
+        configFrame = readConfigFrame2(incoming_client, debug=False)
+    else:
+        raise Exception("Unable to request Config Frame")
+
+    if compute_bytes:
+        pass
+        # TO DO: Implement compute_bytes computation based on config frame
+    return configFrame
+
+
+def startDataStream(idcode, outgoing_client, incoming_client, debug=False):
     """
     Connect to data source, request config frame, send data start command
 
-    :param idcode: Frame ID of PMU
+    :param idcode: ID of PMU
     :type idcode: int
-    :param ip: IP address of data source
-    :type ip: str
-    :param port: Command port on data source
-    :type port: int
-    :param tcpUdp: Use TCP or UDP
-    :type tcpUdp: str
+    :param outgoing_client: client object (Client or Proxy type) for messages to device
+    :type outgoing_cient: BaseClient
+    :param incoming_client: object (Client or Server type) to read messages from device
+    :type outgoing_cient: Client
     :param debug: Print debug statements
     :type debug: bool
 
     :return: Populated :py:class:`pymu.pmuConfigFrame.ConfigFrame` object
     """
     configFrame = None
-    cli = Client(ip, port, tcpUdp)
-    cli.setTimeout(5)
 
     while configFrame is None:
-        requestConfigFrame2(cli, idcode)
-        configFrame = readConfigFrame2(cli, debug)
+        configFrame = getConfigFrame2(
+            idcode, outgoing_client, incoming_client, compute_bytes=False
+        )
 
-    turnDataOn(cli, idcode)
-    data = getDataSampleHex(cli)
+    _ = turnDataOn(outgoing_client, idcode)
+    data = getDataSampleHex(incoming_client)
     dFrame = DataFrame(data, configFrame)
     dataframe_bytes = dFrame.framesize
-    cli.stop()
+    configFrame.update_dataframe_size(dataframe_bytes)
+    incoming_client.stop()
 
-    return configFrame, dataframe_bytes
+    return configFrame
 
 
 def getStations(configFrame):
