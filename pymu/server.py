@@ -20,15 +20,15 @@ class Server:
         self.socketConn = None
         self.connection = None
         self.clientAddr = None
-        self.serverAddr = ""
         self.printInfo = printInfo
-
         self.serverPort = thePort
-        self.serverAddr = (self.serverAddr, self.serverPort)
+
         if proto.lower() == "udp":
             self.useUdp = True
+            self.serverAddr = ("0.0.0.0", self.serverPort)
         else:
             self.useUdp = False
+            self.serverAddr = ("", self.serverPort)
 
         self.startServer(5)
         self.waitForConnection()
