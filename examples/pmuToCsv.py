@@ -83,24 +83,49 @@ def createCsvFile(confFrame):
 
 
 if __name__ == "__main__":
-    confFrame = import_config("id02_neighborhood.pmuconfig")
-    csv_handle = createCsvFile(confFrame)
+    config_mapping = {
+        1: "id01_neighborhood.pmuconfig",
+        2: "id02_neighborhood.pmuconfig",
+    }
+
     dataRcvr = Server(4713, "UDP", True)
     dataRcvr.setTimeout(10)
 
     p = 0
     milliStart = int(round(time.time() * 1000))
     timenow = milliStart
-    run_for = 10000  # milliseconds
+    run_for = 20000  # milliseconds
     while timenow - milliStart < run_for:
         try:
+
+            # Extract idcode from dataframe ------------
+
+            # Method 1: read in first 6 bytes, then the rest of the dataframe
+            # INFERIOR METHOD: Results in significant packet loss. ~28 packets/second
+
+            # d1 = tools.getDataSampleHex(dataRcvr, 6)
+            # if d1 == "":
+            #     break
+            # idcode = int(d1[-4:], 16)
+            # confFrame = import_config(config_mapping[idcode])
+            # d2 = tools.getDataSampleHex(dataRcvr, confFrame.dataframe_bytes - 6)
+            # d = d1 + d2
+
+            # Method 2: read in max bytes, then parse out idcode & grab config
+            # SUPERIOR METHOD: Results in ~58 packets/second
             d = tools.getDataSampleHex(dataRcvr)
-            if d == "":
-                break
+            # if d == "":
+            #     break
+            idcode = int(d[8:12])
+            confFrame = import_config(config_mapping[idcode])
+
+            # -------------------------------------------
+
             dFrame = DataFrame(d, confFrame)  # Create dataFrame
-            csvPrint(dFrame, csv_handle)
             if p == 0:
+                csv_handle = createCsvFile(confFrame)
                 print("Data Collection Started...")
+            csvPrint(dFrame, csv_handle)
             p += 1
         except KeyboardInterrupt:
             break
