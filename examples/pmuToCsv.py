@@ -101,6 +101,8 @@ if __name__ == "__main__":
             # Extract idcode from dataframe ------------
 
             # Method 1: read in first 6 bytes, then the rest of the dataframe
+            # INFERIOR METHOD: Results in significant packet loss. ~28 packets/second
+
             # d1 = tools.getDataSampleHex(dataRcvr, 6)
             # if d1 == "":
             #     break
@@ -110,9 +112,10 @@ if __name__ == "__main__":
             # d = d1 + d2
 
             # Method 2: read in max bytes, then parse out idcode & grab config
-            d = tools.getDataSampleHex(dataRcvr, 65507)
-            if d == "":
-                break
+            # SUPERIOR METHOD: Results in ~58 packets/second
+            d = tools.getDataSampleHex(dataRcvr)
+            # if d == "":
+            #     break
             idcode = int(d[8:12])
             confFrame = import_config(config_mapping[idcode])
 
