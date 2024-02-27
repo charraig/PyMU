@@ -104,6 +104,8 @@ def getDataSampleBytes(rcvr, total_bytes=-1, debug=False):
         payload_bytes = rcvr.readSample(lenToRead)
         full_bytes_str = intro_bytes + payload_bytes
     else:
+        if total_bytes == -1:
+            total_bytes = 508
         full_bytes_str = rcvr.readSample(total_bytes)
 
     return full_bytes_str
